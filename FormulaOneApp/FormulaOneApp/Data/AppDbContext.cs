@@ -1,4 +1,5 @@
 ﻿using FormulaOneApp.Models;
+using FormulaOneApp.Services.AuthServices;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace FormulaOneApp.Data
     {
         public DbSet<Team> Teams { get; set; }
         public DbSet<Pilot> Pilots { get; set; }
+        //public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -19,10 +21,5 @@ namespace FormulaOneApp.Data
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Team>().HasMany(team => team.Pilots);
         }
-
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    modelBuilder.Entity<Pilot>().HasOne(e => e.Team);
-        //}
     }
 }

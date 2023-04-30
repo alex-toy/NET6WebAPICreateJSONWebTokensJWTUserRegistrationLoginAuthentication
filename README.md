@@ -20,3 +20,7 @@ Add-Migration init
 Update-Database
 ```
 
+## Register
+
+<img src="/pictures/register.png" title="register"  width="800">
+<img src="/pictures/register.png" title="register"  width="800">

@@ -2,7 +2,7 @@
 
 namespace FormulaOneApp.AuthModels.DTOs
 {
-    public class UserRegistrationDto
+    public class UserRegistrationRequestDto
     {
         [Required]
         public string Name { get; set; }
