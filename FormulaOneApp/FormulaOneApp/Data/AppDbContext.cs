@@ -1,9 +1,10 @@
 ﻿using FormulaOneApp.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace FormulaOneApp.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext
     {
         public DbSet<Team> Teams { get; set; }
         public DbSet<Pilot> Pilots { get; set; }
@@ -15,6 +16,7 @@ namespace FormulaOneApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Team>().HasMany(team => team.Pilots);
         }
 

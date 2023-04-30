@@ -4,12 +4,13 @@ In this project we will create JSON Web Tokens, User Registration, Login and Aut
 
 <img src="/pictures/init.png" title="app we're starting with"  width="800">
 
-## Migration
+## Project Start up
 
 - Packages to install
 ```
 Microsoft.AspNetCore.Authentication.JwtBearer
 Microsoft.AspNetCore.Identity.EntityFrameworkCore
+Microsoft.AspNetCore.Identity.UI
 Microsoft.EntityFrameworkCore.SqlServer
 ```
 
