@@ -1,5 +1,7 @@
 ﻿using FormulaOneApp.Data;
 using FormulaOneApp.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +20,7 @@ namespace FormulaOneApp.Controllers
 
         [HttpGet]
         [Route("pilots")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Get()
         {
             List<Pilot> Pilots = await _appContext.Pilots.ToListAsync();

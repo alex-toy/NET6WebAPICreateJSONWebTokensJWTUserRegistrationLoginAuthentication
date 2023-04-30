@@ -40,3 +40,14 @@ Update-Database
 - With wrong credentials :
 
 <img src="/pictures/login2.png" title="register"  width="800">
+```
+
+## Route protection
+
+- With right credentials :
+
+<img src="/pictures/route_protection.png" title="route protection"  width="800">
+
+- With wrong credentials :
+
+<img src="/pictures/route_protection2.png" title="route protection"  width="800">
