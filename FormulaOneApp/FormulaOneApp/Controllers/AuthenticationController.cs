@@ -53,34 +53,34 @@ namespace FormulaOneApp.Controllers
             return Ok(jwtToken);
         }
 
-        //[HttpPost]
-        //[Route("login")]
-        //public async Task<IActionResult> Login([FromBody] UserLoginRequest userLogin)
-        //{
-        //    if (!ModelState.IsValid) return BadRequest(new AuthResult()
-        //    {
-        //        Errors = new List<string> { "invalid payload" },
-        //        IsSuccess = false
-        //    });
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] UserLoginRequest userLogin)
+        {
+            if (!ModelState.IsValid) return BadRequest(new AuthResult()
+            {
+                Errors = new List<string> { "invalid payload" },
+                IsSuccess = false
+            });
 
-        //    IdentityUser userDb = await _userManager.FindByEmailAsync(userLogin.Email);
-        //    if (userDb == null) return BadRequest(new AuthResult()
-        //    {
-        //        Errors = new List<string> { "User doesn't exists" },
-        //        IsSuccess = false
-        //    });
+            IdentityUser userDb = await _userManager.FindByEmailAsync(userLogin.Email);
+            if (userDb == null) return BadRequest(new AuthResult()
+            {
+                Errors = new List<string> { "User doesn't exists" },
+                IsSuccess = false
+            });
 
-        //    bool isAuthenticated = await _jwtAuthService.IsAuthenticated(userDb, userLogin);
+            bool isAuthenticated = await _jwtAuthService.IsAuthenticated(userDb, userLogin);
 
-        //    if (!isAuthenticated) return BadRequest(new AuthResult()
-        //    {
-        //        Errors = new List<string> { "User not authenticated" },
-        //        IsSuccess = false
-        //    });
+            if (!isAuthenticated) return BadRequest(new AuthResult()
+            {
+                Errors = new List<string> { "User not authenticated" },
+                IsSuccess = false
+            });
 
-        //    var jwtToken = await _jwtAuthService.GenerateJwtToken(userDb);
-        //    return Ok(jwtToken);
-        //}
+            var jwtToken = await _jwtAuthService.GenerateJwtToken(userDb);
+            return Ok(jwtToken);
+        }
 
         //[HttpPost]
         //[Route("RefreshToken")]

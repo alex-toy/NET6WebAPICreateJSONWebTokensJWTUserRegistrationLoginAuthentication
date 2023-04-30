@@ -1,7 +1,6 @@
 using FormulaOneApp.Configurations;
 using FormulaOneApp.Data;
 using FormulaOneApp.Services.AuthServices;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

@@ -22,5 +22,21 @@ Update-Database
 
 ## Register
 
+- First time with a user :
+
 <img src="/pictures/register.png" title="register"  width="800">
+
+- Second time with the same user :
+
 <img src="/pictures/register.png" title="register"  width="800">
+```
+
+## Login
+
+- With right credentials :
+
+<img src="/pictures/login.png" title="register"  width="800">
+
+- With wrong credentials :
+
+<img src="/pictures/login2.png" title="register"  width="800">

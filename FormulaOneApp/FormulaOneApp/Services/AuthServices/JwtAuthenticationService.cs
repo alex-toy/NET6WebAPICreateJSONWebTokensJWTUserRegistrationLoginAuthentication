@@ -3,7 +3,6 @@ using FormulaOneApp.AuthModels.DTOs;
 using FormulaOneApp.Configurations;
 using FormulaOneApp.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
