@@ -1,12 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FormulaOneApp.AuthModels.DTOs
+namespace FormulaOneApp.DTOs
 {
-    public class UserRegistrationRequestDto
+    public class UserLoginRequest
     {
-        [Required]
-        public string Name { get; set; }
-
         [Required]
         [EmailAddress]
         public string Email { get; set; }

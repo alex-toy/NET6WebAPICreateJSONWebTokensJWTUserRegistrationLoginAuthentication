@@ -1,8 +1,9 @@
-﻿using FormulaOneApp.AuthModels;
-using FormulaOneApp.AuthModels.DTOs;
-using FormulaOneApp.Configurations;
+﻿using FormulaOneApp.Configurations;
 using FormulaOneApp.Data;
+using FormulaOneApp.DTOs;
+using FormulaOneApp.Models.AuthModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -37,37 +38,48 @@ namespace FormulaOneApp.Services.AuthServices
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddSeconds(20),
+                Expires = DateTime.UtcNow.Add(_jwtConfig.ExpiryTimeFrame),
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature)
             };
 
             SecurityToken token = jwtTokenHandler.CreateToken(tokenDescriptor);
             string jwtToken = jwtTokenHandler.WriteToken(token);
-            var refreshToken = new RefreshToken()
-            {
-                JwtId = token.Id,
-                IsUsed = false,
-                IsReworked = false,
-                UserId = user.Id,
-                AddedDate = DateTime.UtcNow,
-                ExpiryDate = DateTime.UtcNow.AddMonths(6),
-                Token = RandomString(35) + Guid.NewGuid()
-            };
+            RefreshToken refreshToken = GenerateRefreshToken(user, jwtTokenHandler, token, jwtToken);
 
-            //await _appDbContext.RefreshTokens.AddAsync(refreshToken);
-            await _appDbContext.SaveChangesAsync();
+            await SaveRefreshTokenToDb(refreshToken);
 
             var authResult = new AuthResult()
             {
                 Token = jwtToken,
                 IsSuccess = true,
-                //RefreshToken = refreshToken.Token
+                RefreshToken = refreshToken.Value
             };
 
             return authResult;
         }
 
-        private string RandomString(int length)
+        private async Task SaveRefreshTokenToDb(RefreshToken refreshToken)
+        {
+            await _appDbContext.RefreshTokens.AddAsync(refreshToken);
+            await _appDbContext.SaveChangesAsync();
+        }
+
+        private RefreshToken GenerateRefreshToken(IdentityUser user, JwtSecurityTokenHandler jwtTokenHandler, SecurityToken token, string jwtToken)
+        {
+            var refreshToken = new RefreshToken()
+            {
+                JwtId = token.Id,
+                IsUsed = false,
+                IsRevoked = false,
+                UserId = user.Id,
+                AddedDate = DateTime.UtcNow,
+                ExpiryDate = DateTime.UtcNow.Add(_jwtConfig.ExpiryTimeFrame),
+                Value = GenerateRandomString(23)
+            };
+            return refreshToken;
+        }
+
+        private string GenerateRandomString(int length)
         {
             var random = new Random();
             var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -110,81 +122,93 @@ namespace FormulaOneApp.Services.AuthServices
             return claims;
         }
 
-        //public async Task<AuthResult> VerifyAndGenerateToken(TokenRequest tokenRequest)
-        //{
-        //    var jwtTokenHandler = new JwtSecurityTokenHandler();
-        //    try
-        //    {
-        //        var tokenInVerification = jwtTokenHandler.ValidateToken(tokenRequest.Token, _tokenValidationParameters, out var validatedToken);
+        public async Task<AuthResult> VerifyAndGenerateToken(TokenRequest tokenRequest)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                ClaimsPrincipal? tokenInVerification = jwtTokenHandler.ValidateToken(tokenRequest.Value, _tokenValidationParameters, out var validatedToken);
 
-        //        if (validatedToken is JwtSecurityToken jwtSecurityToken)
-        //        {
-        //            var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCulture);
-        //            if (result == false) return null;
-        //        }
+                if (validatedToken is JwtSecurityToken jwtSecurityToken)
+                {
+                    bool result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCulture);
+                    if (result == false) return null;
+                }
 
-        //        var utcExpiryDate = long.Parse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
-        //        DateTime expiryDate = UnixTimeStampToDateTime(utcExpiryDate);
-        //        if (expiryDate > DateTime.Now) return new AuthResult()
-        //        {
-        //            IsSuccess = false,
-        //            Errors = new List<string>()
-        //            {
-        //                "Token has not yet expired"
-        //            }
-        //        };
+                string value = tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value;
+                var utcExpiryDate = long.Parse(value);
+                DateTime expiryDate = UnixTimeStampToDateTime(utcExpiryDate);
+                if (expiryDate > DateTime.Now) return new AuthResult()
+                {
+                    IsSuccess = false,
+                    Errors = new List<string>()
+                    {
+                        "Token has not yet expired"
+                    }
+                };
 
-        //        var storedToken = await _appDbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequest.RefreshToken);
-        //        if (storedToken == null) return new AuthResult()
-        //        {
-        //            IsSuccess = false,
-        //            Errors = new List<string>()
-        //            {
-        //                "Token does not exist"
-        //            }
-        //        };
+                RefreshToken? storedToken = await _appDbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Value == tokenRequest.RefreshTokenValue);
+                if (storedToken == null) return new AuthResult()
+                {
+                    IsSuccess = false,
+                    Errors = new List<string>()
+                    {
+                        "Token does not exist"
+                    }
+                };
 
-        //        if (storedToken.IsUsed) return new AuthResult()
-        //        {
-        //            IsSuccess = false,
-        //            Errors = new List<string>()
-        //            {
-        //                "Token has been used"
-        //            }
-        //        };
+                if (storedToken.IsUsed) return new AuthResult()
+                {
+                    IsSuccess = false,
+                    Errors = new List<string>()
+                    {
+                        "Token has been used"
+                    }
+                };
 
-        //        if (storedToken.IsReworked) return new AuthResult()
-        //        {
-        //            IsSuccess = false,
-        //            Errors = new List<string>()
-        //            {
-        //                "Token has been reworked"
-        //            }
-        //        };
+                if (storedToken.IsRevoked) return new AuthResult()
+                {
+                    IsSuccess = false,
+                    Errors = new List<string>()
+                    {
+                        "Token has been reworked"
+                    }
+                };
 
-        //        var jti = tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
-        //        if (storedToken.JwtId != jti) return new AuthResult()
-        //        {
-        //            IsSuccess = false,
-        //            Errors = new List<string>()
-        //            {
-        //                "Token doesn't match"
-        //            }
-        //        };
+                var jti = tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
+                if (storedToken.JwtId != jti) return new AuthResult()
+                {
+                    IsSuccess = false,
+                    Errors = new List<string>()
+                    {
+                        "Token doesn't match"
+                    }
+                };
 
-        //        storedToken.IsUsed = true;
-        //        _appDbContext.RefreshTokens.Update(storedToken);
-        //        await _appDbContext.SaveChangesAsync();
+                storedToken.IsUsed = true;
+                await UpdateStoredToken(storedToken);
 
-        //        var dbUser = await _userManager.FindByIdAsync(storedToken.UserId);
-        //        return await GenerateJwtToken(dbUser);
-        //    }
-        //    catch (Exception)
-        //    {
+                var dbUser = await _userManager.FindByIdAsync(storedToken.UserId);
+                return await GenerateJwtToken(dbUser);
+            }
+            catch (Exception ex)
+            {
+                return new AuthResult()
+                {
+                    IsSuccess = false,
+                    Errors = new List<string>()
+                    {
+                        $"server error : {ex.Message}"
+                    }
+                };
+            }
+        }
 
-        //        throw;
-        //    }
-        //}
+        private async Task UpdateStoredToken(RefreshToken? storedToken)
+        {
+            _appDbContext.RefreshTokens.Update(storedToken);
+            await _appDbContext.SaveChangesAsync();
+        }
 
         private DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {

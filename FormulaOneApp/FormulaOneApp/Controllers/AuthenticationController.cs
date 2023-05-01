@@ -1,5 +1,5 @@
-﻿using FormulaOneApp.AuthModels;
-using FormulaOneApp.AuthModels.DTOs;
+﻿using FormulaOneApp.DTOs;
+using FormulaOneApp.Models.AuthModels;
 using FormulaOneApp.Services.AuthServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -82,24 +82,24 @@ namespace FormulaOneApp.Controllers
             return Ok(jwtToken);
         }
 
-        //[HttpPost]
-        //[Route("RefreshToken")]
-        //public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
-        //{
-        //    if (!ModelState.IsValid) return BadRequest(new AuthResult()
-        //    {
-        //        Errors = new List<string> { "invalid payload" },
-        //        IsSuccess = false
-        //    });
+        [HttpPost]
+        [Route("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
+        {
+            if (!ModelState.IsValid) return BadRequest(new AuthResult()
+            {
+                Errors = new List<string> { "invalid payload" },
+                IsSuccess = false
+            });
 
-        //    AuthResult result = await _jwtAuthService.VerifyAndGenerateToken(tokenRequest);
-        //    if (result == null) return BadRequest(new AuthResult()
-        //    {
-        //        Errors = new List<string> { "invalid token" },
-        //        IsSuccess = false
-        //    });
+            AuthResult result = await _jwtAuthService.VerifyAndGenerateToken(tokenRequest);
+            if (result == null) return BadRequest(new AuthResult()
+            {
+                Errors = new List<string> { "invalid token" },
+                IsSuccess = false
+            });
 
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
     }
 }

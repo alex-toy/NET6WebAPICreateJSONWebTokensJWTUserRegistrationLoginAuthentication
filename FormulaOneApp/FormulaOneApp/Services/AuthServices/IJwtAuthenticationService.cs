@@ -1,5 +1,5 @@
-﻿using FormulaOneApp.AuthModels;
-using FormulaOneApp.AuthModels.DTOs;
+﻿using FormulaOneApp.DTOs;
+using FormulaOneApp.Models.AuthModels;
 using Microsoft.AspNetCore.Identity;
 
 namespace FormulaOneApp.Services.AuthServices
@@ -8,6 +8,6 @@ namespace FormulaOneApp.Services.AuthServices
     {
         Task<AuthResult> GenerateJwtToken(IdentityUser user);
         Task<bool> IsAuthenticated(IdentityUser existingUser, UserLoginRequest login);
-        //Task<AuthResult> VerifyAndGenerateToken(TokenRequest tokenRequest);
+        Task<AuthResult> VerifyAndGenerateToken(TokenRequest tokenRequest);
     }
 }

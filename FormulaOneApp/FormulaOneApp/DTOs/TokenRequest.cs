@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FormulaOneApp.AuthModels.DTOs
+namespace FormulaOneApp.DTOs
 {
     public class TokenRequest
     {
         [Required]
-        public string Token { get; set; }
+        public string Value { get; set; }
 
         [Required]
-        public string RefreshToken { get; set; }
+        public string RefreshTokenValue { get; set; }
     }
 }
